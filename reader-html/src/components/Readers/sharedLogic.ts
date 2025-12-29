@@ -59,11 +59,11 @@ const fontFamilyList: string[] = [
   `'Tahoma', 'Geneva', sans-serif`,
   `'Verdana', 'Geneva', sans-serif`,
   `'Georgia', 'Times New Roman', Times, serif`,
-  // Merriweather (installed on your system) with classic serif fallbacks
   `'Merriweather', Georgia, 'Times New Roman', serif`,
+  `'Literata', 'Times New Roman', serif`,
   `'Trebuchet MS', Helvetica, sans-serif`,
   // 霞鹜文楷（LXGW WenKai），带常见中文 serif 后备
-  `'霞鹜文楷 屏幕阅读版', 'LXGW WenKai Screen', 'STKaiti', '华文楷体', 'KaiTi', '楷体', serif`,
+  `'LXGW WenKai', '霞鹜文楷', serif`,
   `'Comic Sans MS', cursive, sans-serif`,
   `'Lucida Sans', 'Lucida Grande', sans-serif`,
   `'Palatino Linotype', 'Book Antiqua', Palatino, serif`,
