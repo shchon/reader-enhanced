@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Web EPUB Reader Demo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- 字体 -->
+<link href="https://fonts.googleapis.com/css2?family=Literata:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+/* ===== 基础 ===== */
+body {
+  margin: 0;
+  font-family: "Literata", Georgia, serif;
+  background: #f7f5f2;
+  color: #2b2b2b;
+  transition: background 0.3s, color 0.3s;
+}
+
+body.dark {
+  background: #1e1e1e;
+  color: #dcdcdc;
+}
+
+/* ===== 阅读容器 ===== */
+.reader {
+  min-height: 100vh;
+  padding: 64px 16px;
+}
+
+.content {
+  max-width: 680px;
+  margin: 0 auto;
+  font-size: 18px;
+  line-height: 1.75;
+}
+
+/* ===== 段落 ===== */
+.content p {
+  margin: 0 0 1.2em;
+}
+
+/* ===== 单词高亮 ===== */
+.word {
+  cursor: pointer;
+  padding: 0 2px;
+  border-bottom: 1px solid rgba(80,120,200,0.35);
+}
+
+.word:hover {
+  background: rgba(80,120,200,0.08);
+}
+
+/* ===== 查词浮层 ===== */
+.popover {
+  position: absolute;
+  max-width: 260px;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 12px 32px rgba(0,0,0,.15);
+  font-size: 14px;
+  z-index: 100;
+}
+
+body.dark .popover {
+  background: #2a2a2a;
+}
+
+.popover .meaning {
+  margin-bottom: 8px;
+}
+
+.popover .actions {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  color: #4f6ef7;
+  cursor: pointer;
+}
+
+/* ===== 工具栏 ===== */
+.toolbar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(8px);
+  border-radius: 999px;
+  padding: 8px 16px;
+  display: flex;
+  gap: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  transition: opacity 0.3s;
+}
+
+body.dark .toolbar {
+  background: rgba(40,40,40,0.9);
+}
+
+.toolbar button {
+  border: none;
+  background: none;
+  font-size: 14px;
+  cursor: pointer;
+  color: inherit;
+}
+</style>
+</head>
+
+<body>
+
+<main class="reader">
+  <article class="content">
+    <p>
+      <span class="word">Reading</span> is a way to slow down and 
+      <span class="word">focus</span> your mind. When you encounter a new 
+      <span class="word">word</span>, you can tap it gently without breaking 
+      your <span class="word">flow</span>.
+    </p>
+
+    <p>
+      This demo shows how a <span class="word">simple</span> and 
+      <span class="word">calm</span> interface can greatly improve long-form 
+      reading on the <span class="word">web</span>.
+    </p>
+  </article>
+</main>
+
+<!-- 工具栏 -->
+<div class="toolbar">
+  <button id="toggleDark">🌙 Dark</button>
+</div>
+
+<script>
+/* ===== 模拟词典 ===== */
+const DICT = {
+  Reading: "阅读；朗读",
+  focus: "专注；集中注意力",
+  word: "单词；词语",
+  flow: "流畅感；节奏",
+  simple: "简单的",
+  calm: "平静的；安静的",
+  web: "网络；网页"
+};
+
+let popover;
+
+/* ===== 单词点击 ===== */
+document.querySelectorAll(".word").forEach(word => {
+  word.addEventListener("click", e => {
+    removePopover();
+
+    const text = e.target.innerText;
+    const meaning = DICT[text] || "暂无释义";
+
+    popover = document.createElement("div");
+    popover.className = "popover";
+    popover.innerHTML = `
+      <div class="meaning"><strong>${text}</strong>：${meaning}</div>
+      <div class="actions">
+        <div>⭐ 生词本</div>
+        <div>🤖 AI 解释</div>
+      </div>
+    `;
+
+    document.body.appendChild(popover);
+
+    const rect = e.target.getBoundingClientRect();
+    popover.style.left = rect.left + window.scrollX + "px";
+    popover.style.top = rect.bottom + window.scrollY + 6 + "px";
+  });
+});
+
+/* ===== 移除浮层 ===== */
+document.addEventListener("click", e => {
+  if (!e.target.classList.contains("word")) {
+    removePopover();
+  }
+});
+
+function removePopover() {
+  if (popover) {
+    popover.remove();
+    popover = null;
+  }
+}
+
+/* ===== 暗色模式 ===== */
+document.getElementById("toggleDark").onclick = () => {
+  document.body.classList.toggle("dark");
+};
+</script>
+
+</body>
+</html>

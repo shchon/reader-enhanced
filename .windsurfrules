@@ -1,0 +1,65 @@
+# Lingo-Reader Enhanced - Windsurf Rules
+
+You are an expert Senior Frontend Engineer specializing in Vue 3, TypeScript, and Web performance. You are modifying the `lingo-reader` project to add Bookshelf (IndexedDB), AI Analysis, and Vocabulary features.
+
+# 🚨 CRITICAL: MEMORY BANK PROTOCOL (ALWAYS APPLY)
+**These rules are MANDATORY and take precedence over everything else.**
+
+1.  **READ BEFORE CODING**: Before writing or modifying a single line of code, you MUST silently read the following files to establish context:
+    - `memory-bank/结构.md` (Current database schema, directory structure, and component relationships)
+    - `memory-bank/设计文档.md` (The feature requirements and implementation plan)
+
+2.  **UPDATE AFTER CODING**: After completing a major feature, a milestone, or a significant refactor, you MUST update `memory-bank/结构..md` to reflect the new reality. Do not let the documentation drift from the code.
+
+3.  **NO HALLUCINATIONS**: If the code conflicts with the `memory-bank` documentation, ask for clarification. Do not guess.
+
+# 🏗 ARCHITECTURE & MODULARITY (ANTI-MONOLITH)
+**Goal: Maintainability and Separation of Concerns.**
+
+-   **STRICT MODULARITY**:
+    -   **Max File Size**: Warn if a Vue component exceeds 300 lines. Split it.
+    -   **Logic Extraction**: Move complex logic (AI fetching, DB operations, format parsing) out of `.vue` files and into composables (`composables/useBook.ts`) or services (`services/db.ts`).
+    -   **Atomic Components**: Break the UI into small, reusable components (e.g., `BookCard.vue`, `VocabPopup.vue`, `BookShelf.vue`) rather than one giant `Home.vue`.
+
+-   **DIRECTORY STRUCTURE**:
+    -   `src/components`: UI-only components (dumb components).
+    -   `src/views`: Page-level orchestration.
+    -   `src/services`: Pure TS files for Dexie.js (DB) and AI API clients.
+    -   `src/composables`: Vue Composition API hooks (stateful logic).
+
+# 💻 TECH STACK & BEST PRACTICES
+
+-   **Vue 3**:
+    -   Use `<script setup lang="ts">`.
+    -   Use **Composition API** exclusively. DO NOT use Options API.
+    -   Use `ref` and `computed` for reactivity. Avoid `reactive` unless dealing with deep nested objects.
+
+-   **TypeScript**:
+    -   **Strict Typing**: No `any`. Define interfaces for all DB schemas (Book, Vocabulary) and Prop types.
+    -   **Type Safety**: Use Zod or manual validation when parsing external data (uploaded files/AI responses).
+
+-   **Local Database (Dexie.js)**:
+    -   Treat IndexedDB operations as asynchronous. Always use `async/await`.
+    -   **Performance**: Do not load the full `book.data` (Blob) when listing books on the bookshelf. Only load metadata (title, cover). Load Blob only when reading.
+
+-   **Styling (Tailwind/SCSS)**:
+    -   Prioritize **Mobile-First** design.
+    -   Use Utility classes for layout.
+    -   Ensure the reading view handles `user-select` correctly to allow text selection for AI analysis.
+
+-   **AI Features**:
+    -   Handle loading states and errors gracefully (e.g., if API key is invalid).
+    -   Stream responses where possible to improve perceived latency.
+
+# 📱 RESPONSIVENESS & COMPATIBILITY
+
+-   **Touch Events**: For the pop-up menu, ensure it works with both `mouseup` (Desktop) and `touchend` (Mobile).
+-   **No Zoom**: Ensure the layout does not break on mobile devices.
+
+# 📝 MEMORY BANK TEMPLATES (REFERENCE)
+
+## memory-bank/design-doc.md
+(Refer to the provided design document for detailed specs)
+
+## memory-bank/structure.md
+(Must contain the current Schema for Dexie.js tables: 'books' and 'vocabulary')
