@@ -19,9 +19,9 @@ export default defineConfig({
     },
   },
   server: {
-    host: '0.0.0.0',   // 关键：监听所有网卡（IPv4）
-    port: 5173,        // 可按需修改
-    strictPort: true,  // 端口被占用时不要自动换端口，方便确认
+    host: '0.0.0.0', // 关键：监听所有网卡（IPv4）
+    port: 5173, // 可按需修改
+    strictPort: true, // 端口被占用时不要自动换端口，方便确认
   },
   build: {
     rollupOptions: {

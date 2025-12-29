@@ -1,4 +1,4 @@
-import { onMounted, onUnmounted, ref, type Ref } from 'vue'
+import { type Ref, onMounted, onUnmounted, ref } from 'vue'
 
 export interface VocabularyPopupState {
   visible: Ref<boolean>
@@ -20,17 +20,20 @@ export function useVocabularyPopup(rootRef: Ref<HTMLElement | null>): Vocabulary
 
   const handleClick = (event: Event) => {
     const target = event.target as HTMLElement | null
-    if (!target) return
+    if (!target)
+      return
 
     const span = target.closest('.vocab-word') as HTMLElement | null
-    if (!span) return
+    if (!span)
+      return
 
     const spanWord = span.dataset.vocabWord ?? span.textContent ?? ''
     const spanContext = span.dataset.vocabContext ?? ''
     const spanExplanation = span.dataset.vocabExplanation ?? ''
     const spanId = span.dataset.vocabId ?? ''
 
-    if (!spanWord) return
+    if (!spanWord)
+      return
 
     word.value = spanWord
     context.value = spanContext
@@ -56,12 +59,14 @@ export function useVocabularyPopup(rootRef: Ref<HTMLElement | null>): Vocabulary
   }
 
   onMounted(() => {
-    if (!rootRef.value) return
+    if (!rootRef.value)
+      return
     rootRef.value.addEventListener('click', handleClick)
   })
 
   onUnmounted(() => {
-    if (!rootRef.value) return
+    if (!rootRef.value)
+      return
     rootRef.value.removeEventListener('click', handleClick)
   })
 

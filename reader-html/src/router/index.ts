@@ -1,7 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { useBookStore } from '../store'
-import routes from './routes'
 import { db } from '../services/db'
+import routes from './routes'
 
 const router = createRouter({
   routes,
@@ -23,7 +23,7 @@ router.beforeEach(async (to, _from, next) => {
   }
 
   const rawBookId = to.query.bookId
-  const bookId = typeof rawBookId === 'string' ? Number(rawBookId) : NaN
+  const bookId = typeof rawBookId === 'string' ? Number(rawBookId) : Number.NaN
   if (!Number.isFinite(bookId)) {
     next({ name: 'home' })
     return

@@ -62,7 +62,7 @@ function normaliseAuthorValue(value: unknown): string {
       return first.trim()
     }
     if (first && typeof first === 'object') {
-      const maybeName = (first as { name?: unknown; fileAs?: unknown }).name
+      const maybeName = (first as { name?: unknown, fileAs?: unknown }).name
         ?? (first as { fileAs?: unknown }).fileAs
       if (typeof maybeName === 'string') {
         return maybeName.trim()

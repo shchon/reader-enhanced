@@ -1,22 +1,25 @@
-import { nextTick, onMounted, onUnmounted, type Ref, watch } from 'vue'
+import { type Ref, nextTick, onMounted, onUnmounted, watch } from 'vue'
 import { getVocabularyByBookId } from '../services/vocabularyService'
 import type { VocabularyItem } from '../services/db'
 
 const VOCAB_UPDATE_EVENT = 'lingoReader:vocabularyUpdated'
 
 export function notifyVocabularyUpdated(bookId: number): void {
-  if (!bookId) return
+  if (!bookId)
+    return
   window.dispatchEvent(new CustomEvent(VOCAB_UPDATE_EVENT, { detail: { bookId } }))
 }
 
 function isWordBoundaryChar(ch: string | undefined): boolean {
-  if (!ch) return true
-  return !/[A-Za-z0-9]/.test(ch)
+  if (!ch)
+    return true
+  return !/[A-Z0-9]/i.test(ch)
 }
 
 function highlightWord(root: HTMLElement, item: VocabularyItem) {
   const word = item.word.trim()
-  if (!word) return
+  if (!word)
+    return
 
   const lowerWord = word.toLowerCase()
 
@@ -71,7 +74,8 @@ function clearExistingHighlights(root: HTMLElement) {
   const spans = Array.from(root.querySelectorAll('span.vocab-word'))
   for (const span of spans) {
     const parent = span.parentNode
-    if (!parent) continue
+    if (!parent)
+      continue
     const textNode = document.createTextNode(span.textContent ?? '')
     parent.replaceChild(textNode, span)
     parent.normalize()
@@ -100,9 +104,11 @@ export function useVocabularyHighlight(options: {
 
   const schedule = async () => {
     const id = bookId.value
-    if (!id || !rootRef.value) return
+    if (!id || !rootRef.value)
+      return
     await nextTick()
-    if (!rootRef.value) return
+    if (!rootRef.value)
+      return
     void applyHighlights(rootRef.value, id)
   }
 
@@ -113,8 +119,10 @@ export function useVocabularyHighlight(options: {
   const handleExternalUpdate = (event: Event) => {
     const custom = event as CustomEvent<{ bookId?: number }>
     const updatedBookId = custom.detail?.bookId
-    if (!updatedBookId) return
-    if (updatedBookId !== bookId.value) return
+    if (!updatedBookId)
+      return
+    if (updatedBookId !== bookId.value)
+      return
     void schedule()
   }
 

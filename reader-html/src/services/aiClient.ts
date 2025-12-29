@@ -56,7 +56,7 @@ export async function streamExplainSelection(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
+        'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify(body),
       signal,
@@ -154,7 +154,7 @@ export async function testAiConnection(signal?: AbortSignal): Promise<void> {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
+      'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify(body),
     signal,

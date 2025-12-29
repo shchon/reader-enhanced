@@ -1,4 +1,4 @@
-import { db, type VocabularyItem } from './db'
+import { type VocabularyItem, db } from './db'
 
 export interface AddVocabularyInput {
   word: string
@@ -34,7 +34,8 @@ export async function addVocabularyItem(input: AddVocabularyInput): Promise<void
 }
 
 export async function getVocabularyByBookId(bookId: number): Promise<VocabularyItem[]> {
-  if (!bookId) return []
+  if (!bookId)
+    return []
   return db.vocabulary.where('bookId').equals(bookId).toArray()
 }
 
