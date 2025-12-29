@@ -9,10 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@lingo-reader/epub-parser": "workspace:^",
-    "@lingo-reader/fb2-parser": "workspace:^",
-    "@lingo-reader/mobi-parser": "workspace:^",
-    "@lingo-reader/shared": "workspace:^",
+    "@lingo-reader/epub-parser": "^0.4.4",
+    "@lingo-reader/fb2-parser": "^0.4.4",
+    "@lingo-reader/mobi-parser": "^0.4.4",
+    "@lingo-reader/shared": "^0.4.4",
     "dexie": "^3.2.5",
     "dompurify": "^3.2.3",
     "pinia": "^2.2.6",

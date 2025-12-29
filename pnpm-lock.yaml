@@ -112,17 +112,17 @@ importers:
   reader-html:
     dependencies:
       '@lingo-reader/epub-parser':
-        specifier: workspace:^
-        version: link:../packages/epub-parser
+        specifier: ^0.4.4
+        version: 0.4.4
       '@lingo-reader/fb2-parser':
-        specifier: workspace:^
-        version: link:../packages/fb2-parser
+        specifier: ^0.4.4
+        version: 0.4.4
       '@lingo-reader/mobi-parser':
-        specifier: workspace:^
-        version: link:../packages/mobi-parser
+        specifier: ^0.4.4
+        version: 0.4.4
       '@lingo-reader/shared':
-        specifier: workspace:^
-        version: link:../packages/shared
+        specifier: ^0.4.4
+        version: 0.4.4
       dexie:
         specifier: ^3.2.5
         version: 3.2.7
@@ -531,6 +531,18 @@ packages:
   '@jsdevtools/ez-spawn@3.0.4':
     resolution: {integrity: sha512-f5DRIOZf7wxogefH03RjMPMdBF7ADTWUMoOs9kaJo06EfwF+aFhMZMDZxHg/Xe12hptN9xoZjGso2fdjapBRIA==}
     engines: {node: '>=10'}
+
+  '@lingo-reader/epub-parser@0.4.4':
+    resolution: {integrity: sha512-H4bzECUxdVq4nEatTrB4nMh6Ss6ofE0P43p8rvvmJcuV7cpyKZwOyLa1z84xPuLhGa0Dfd0JCOTo0LnmI5mkoA==}
+
+  '@lingo-reader/fb2-parser@0.4.4':
+    resolution: {integrity: sha512-7X6ki9UAgUDS9FRubDabzXubkrDJKJA/PP+IcBDGW8xTr7rM0XzW7dhqKDh2UpOGH4o2PdBNlurS0u8Z4bF2DA==}
+
+  '@lingo-reader/mobi-parser@0.4.4':
+    resolution: {integrity: sha512-smiU2W+EkRUU2SImzqfQmPoowktdR66MZ0W8nk1ZUCTbPIUuQJI7E45YGNcdgjUB6xcS9tVx0VHAtT8D3lCDMQ==}
+
+  '@lingo-reader/shared@0.4.4':
+    resolution: {integrity: sha512-L9l2EyFLRlRnH4Fib9ycio9I3RYhTULpxjqsCKj/ZO6JA3FUWV1kgEdpYORtP3M/lNbQfeCwzdDdTOjyyJ8ovQ==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -3334,6 +3346,27 @@ snapshots:
       cross-spawn: 7.0.3
       string-argv: 0.3.2
       type-detect: 4.0.8
+
+  '@lingo-reader/epub-parser@0.4.4':
+    dependencies:
+      '@lingo-reader/shared': 0.4.4
+      fflate: 0.8.2
+      jszip: 3.10.1
+
+  '@lingo-reader/fb2-parser@0.4.4':
+    dependencies:
+      '@lingo-reader/shared': 0.4.4
+
+  '@lingo-reader/mobi-parser@0.4.4':
+    dependencies:
+      '@lingo-reader/shared': 0.4.4
+      fflate: 0.8.2
+
+  '@lingo-reader/shared@0.4.4':
+    dependencies:
+      events: 3.3.0
+      path-browserify: 1.0.1
+      sax: 1.4.1
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
