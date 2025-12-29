@@ -59,10 +59,12 @@ async function exportVocabularyToAnki() {
       ? context.split(word).join(`<b>${word}</b>`)
       : context
 
+    const explanation = (item.aiExplanation ?? '').replace(/\r\n|\r|\n/g, '<br>')
+
     return [
       word,
       highlightedContext,
-      item.aiExplanation ?? '',
+      explanation,
     ]
   })
 
