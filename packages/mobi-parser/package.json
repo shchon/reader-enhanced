@@ -33,8 +33,8 @@
       }
     }
   },
-  "main": "./src/index.node.js",
-  "module": "./src/index.node.mjs",
+  "main": "./dist/index.node.js",
+  "module": "./dist/index.node.mjs",
   "types": "./dist/index.d.ts",
   "files": [
     "dist"
