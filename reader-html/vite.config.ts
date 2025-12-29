@@ -5,7 +5,7 @@ import postCssPxToRem from 'postcss-pxtorem'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [vue()],
-  base: '/lingo-reader/',
+  base: '/',
   css: {
     postcss: {
       plugins: [

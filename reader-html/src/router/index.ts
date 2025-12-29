@@ -5,8 +5,8 @@ import routes from './routes'
 
 const router = createRouter({
   routes,
-  // Now /lingo-reader/ is same to base option in vite.config.ts
-  history: createWebHashHistory('/lingo-reader/'),
+  // Keep hash history base in sync with Vite base for deployment (Vercel: '/')
+  history: createWebHashHistory(import.meta.env.BASE_URL),
 })
 
 // Ensure /book has an initialized book; try to restore from IndexedDB using bookId on refresh.
