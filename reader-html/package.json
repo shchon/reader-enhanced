@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -13,8 +13,8 @@
     "@lingo-reader/fb2-parser": "workspace:^",
     "@lingo-reader/mobi-parser": "workspace:^",
     "@lingo-reader/shared": "workspace:^",
-    "dompurify": "^3.2.3",
     "dexie": "^3.2.5",
+    "dompurify": "^3.2.3",
     "pinia": "^2.2.6",
     "vue": "^3.5.12",
     "vue-i18n": "10",

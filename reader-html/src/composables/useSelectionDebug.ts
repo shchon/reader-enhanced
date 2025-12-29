@@ -81,11 +81,9 @@ export function useSelectionDebug() {
     }
 
     const info = extractSelection()
-    if (!info) {
-      return
+    if (info) {
+      // selection debug output was only for development; intentionally left unused
     }
-
-    console.info('[AI][Selection]', info)
   }
 
   onMounted(() => {

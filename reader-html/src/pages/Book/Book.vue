@@ -43,7 +43,7 @@ const {
   y: selectionMenuY,
   text: selectionText,
   context: selectionContext,
-  hide: hideSelectionMenu,
+  
 } = useSelectionMenu()
 
 // Phase 2 - Step 4: AI explain panel

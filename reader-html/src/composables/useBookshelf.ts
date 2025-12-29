@@ -38,8 +38,6 @@ export function useBookshelf() {
         })),
       )
 
-      console.info('[Bookshelf] Parsed books saved to IndexedDB', parsed)
-
       // 导入完成后立即刷新内存中的书架列表，避免需要手动刷新页面
       await loadBooks()
     }
@@ -50,7 +48,7 @@ export function useBookshelf() {
 
   async function loadBooks() {
     const all = await db.books.toArray()
-    books.value = all.map((book) => ({
+    books.value = all.map(book => ({
       id: book.id!,
       title: book.title,
       author: book.author,
