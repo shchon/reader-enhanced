@@ -21,16 +21,19 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "browser": {
+        "import": "./dist/index.browser.mjs",
+        "require": "./dist/index.browser.js",
+        "default": "./dist/index.browser.mjs"
+      },
       "node": {
         "import": "./dist/index.node.mjs",
         "require": "./dist/index.node.js",
         "default": "./dist/index.node.js"
       },
-      "browser": {
-        "import": "./dist/index.browser.mjs",
-        "require": "./dist/index.browser.js",
-        "default": "./dist/index.browser.mjs"
-      }
+      "import": "./dist/index.browser.mjs",
+      "require": "./dist/index.node.js",
+      "default": "./dist/index.browser.mjs"
     }
   },
   "main": "./dist/index.node.js",
