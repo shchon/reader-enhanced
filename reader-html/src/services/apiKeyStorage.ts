@@ -12,8 +12,46 @@ const DEFAULT_AI_MODEL = 'doubao-1.5-lite-32k-250115'
 const DEFAULT_ZH_EXPLAIN_PROMPT
   = '根据{context}解释 {word}.注意:请给出在当前句子中词语的拼音;并给出1个包含{word}的例句.'
 
-const DEFAULT_EN_TRANSLATE_PROMPT
-  = '根据{context}解释单词 {word} ，如果{word}在{context}中有固定搭配，请提取出英文短语的搭配并解释。\n\n##请按照下面的格式返回信息:\n1. 英标:[]||释义: "at"用来显示多罗茜流泪的原因. \n2. 固定搭配: 。\n3. 例句:\nThe child laughed with joy at the funny puppet show.\n孩子被有趣的木偶戏逗得哈哈大笑。'
+const DEFAULT_EN_TRANSLATE_PROMPT = `你是一名专业的英语词汇与语境分析助手，面向英语学习者。
+
+请根据以下上下文解释单词{word}：
+
+上下文
+{context}
+
+任务要求：
+1. 给出{word}的基本信息，英标与词性必须放在同一行。
+2. 结合上下文，给出{word}在该语境中的准确中文释义（只给最贴合语境的一种含义）。
+3. 如果{word}在该上下文中构成了固定搭配、常见短语或习惯用法：
+   - 提取原文中的英文搭配
+   - 在同一行给出该搭配及其中文解释
+   如果没有明显固定搭配，请在同一行输出：
+   固定搭配：本句中未构成固定搭配
+4. 提供一个简短、自然的英文例句，体现该词或该搭配的常见用法。
+5. 在英文例句下一行直接给出对应的中文翻译，不要添加任何标题。
+6. 表达清晰、简洁，适合直接展示给学习者。
+
+输出格式严格如下：
+英标｜词性：
+语境释义：
+固定搭配：
+例句：`
+
+export function getDefaultAiBaseUrl(): string {
+  return DEFAULT_AI_BASE_URL
+}
+
+export function getDefaultAiModel(): string {
+  return DEFAULT_AI_MODEL
+}
+
+export function getDefaultEnTranslatePrompt(): string {
+  return DEFAULT_EN_TRANSLATE_PROMPT
+}
+
+export function getDefaultZhExplainPrompt(): string {
+  return DEFAULT_ZH_EXPLAIN_PROMPT
+}
 
 function getStorage(): Storage | null {
   if (typeof window === 'undefined') {

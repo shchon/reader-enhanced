@@ -11,6 +11,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'explain'): void
+  (e: 'read-aloud'): void
   (e: 'add-vocabulary'): void
   (e: 'close'): void
 }>()
@@ -41,6 +42,13 @@ const style = computed(() => ({
             @click="emit('explain')"
           >
             {{ t('selectionMenuExplain') }}
+          </button>
+          <button
+            type="button"
+            class="selection-menu-button secondary"
+            @click="emit('read-aloud')"
+          >
+            {{ t('selectionMenuReadAloud') }}
           </button>
           <button
             type="button"

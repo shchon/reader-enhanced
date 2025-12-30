@@ -15,6 +15,10 @@ import {
   getAiPromptMode,
   setAiPromptMode,
   setApiKey,
+  getDefaultAiBaseUrl,
+  getDefaultAiModel,
+  getDefaultEnTranslatePrompt,
+  getDefaultZhExplainPrompt,
 } from '../services/apiKeyStorage'
 import { testAiConnection } from '../services/aiClient'
 
@@ -63,7 +67,6 @@ async function handleSave() {
     setAiBaseUrl(baseUrl.value.trim())
     setAiModel(model.value.trim())
 
-    setAiGeneralPrompt(promptGeneral.value)
     setAiEnTranslatePrompt(promptEnTranslate.value)
     setAiZhExplainPrompt(promptZhExplain.value)
 
@@ -72,6 +75,28 @@ async function handleSave() {
   finally {
     isSaving.value = false
   }
+}
+
+function handleResetToDefaults() {
+  // 仅重置当前表单中的 AI 设置字段到内置默认值，不修改 API Key
+  baseUrl.value = getDefaultAiBaseUrl()
+  model.value = getDefaultAiModel()
+  promptEnTranslate.value = getDefaultEnTranslatePrompt()
+  promptZhExplain.value = getDefaultZhExplainPrompt()
+}
+
+function handleClickEnPromptTab() {
+  activePromptTab.value = 'enTranslate'
+  setAiPromptMode('en')
+  // 点击分页时，将当前编辑内容重置为最近一次保存的值（或系统默认）
+  promptEnTranslate.value = getAiEnTranslatePrompt()
+}
+
+function handleClickZhPromptTab() {
+  activePromptTab.value = 'zhExplain'
+  setAiPromptMode('zh')
+  // 点击分页时，将当前编辑内容重置为最近一次保存的值（或系统默认）
+  promptZhExplain.value = getAiZhExplainPrompt()
 }
 
 async function handleTestConnection() {
@@ -102,12 +127,12 @@ function handleBackToHome() {
 <template>
   <main class="settings-root">
     <header class="settings-header">
-      <h1 class="settings-title">
-        {{ t('settingsTitle') }}
-      </h1>
       <button type="button" class="settings-button secondary" @click="handleBackToHome">
         {{ t('settingsBackToHome') }}
       </button>
+      <h1 class="settings-title">
+        {{ t('settingsTitle') }}
+      </h1>
     </header>
 
     <section class="settings-section">
@@ -159,7 +184,7 @@ function handleBackToHome() {
             type="button"
             class="settings-tab"
             :class="{ active: activePromptTab === 'enTranslate' }"
-            @click="() => { activePromptTab = 'enTranslate'; setAiPromptMode('en') }"
+            @click="handleClickEnPromptTab"
           >
             {{ t('settingsPromptTabEnTranslate') }}
           </button>
@@ -167,7 +192,7 @@ function handleBackToHome() {
             type="button"
             class="settings-tab"
             :class="{ active: activePromptTab === 'zhExplain' }"
-            @click="() => { activePromptTab = 'zhExplain'; setAiPromptMode('zh') }"
+            @click="handleClickZhPromptTab"
           >
             {{ t('settingsPromptTabZhExplain') }}
           </button>
@@ -202,6 +227,14 @@ function handleBackToHome() {
           @click="handleTestConnection"
         >
           {{ isTesting ? t('settingsTesting') : t('settingsTestButton') }}
+        </button>
+        <button
+          type="button"
+          class="settings-button secondary"
+          :disabled="isSaving || isTesting"
+          @click="handleResetToDefaults"
+        >
+          {{ t('settingsResetDefaults') }}
         </button>
       </div>
 

@@ -43,7 +43,7 @@ const {
   y: selectionMenuY,
   text: selectionText,
   context: selectionContext,
-  
+  hide: hideSelectionMenu,
 } = useSelectionMenu()
 
 // Phase 2 - Step 4: AI explain panel
@@ -106,6 +106,10 @@ async function handleAddVocabulary() {
   })
 
   notifyVocabularyUpdated(bookId)
+
+  // 添加完成后关闭 AI 面板（如果有）和浮动菜单
+  closeAiPanel()
+  hideSelectionMenu()
 }
 
 function handleReadAloudSelection() {
@@ -119,6 +123,13 @@ function handleReadAloudSelection() {
   const utterance = new SpeechSynthesisUtterance(sentence)
   window.speechSynthesis.cancel()
   window.speechSynthesis.speak(utterance)
+}
+
+function handleCloseSelectionMenu() {
+  // 关闭 AI 解释面板（如果当前是打开的）
+  closeAiPanel()
+  // 隐藏浮动菜单
+  hideSelectionMenu()
 }
 
 /**
@@ -273,8 +284,9 @@ function tocItemClick(item: FlatedTocItem) {
     :y="selectionMenuY"
     :text="selectionText"
     @explain="handleExplainSelection"
+    @read-aloud="handleReadAloudSelection"
     @add-vocabulary="handleAddVocabulary"
-    @close="handleReadAloudSelection"
+    @close="handleCloseSelectionMenu"
   />
   <AiExplainPanel
     :visible="isAiPanelVisible"
