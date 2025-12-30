@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useBookshelf } from '../composables/useBookshelf'
 import BookCard from '../components/Bookshelf/BookCard.vue'
-import { getAllVocabularyItems } from '../services/vocabularyService'
+import { addVocabularyItem, getAllVocabularyItems } from '../services/vocabularyService'
 import { saveLocale } from '../i18n'
 
 const router = useRouter()
@@ -13,6 +13,8 @@ const { isImporting, books, handleFilesSelected, loadBooks, openBookFromId, dele
 
 const vocabularyWords = ref<string[]>([])
 const isVocabularyOpen = ref(false)
+
+const vocabularyImportInputRef = ref<HTMLInputElement | null>(null)
 
 const vocabularyCount = computed(() => vocabularyWords.value.length)
 
@@ -92,6 +94,140 @@ async function exportVocabularyToAnki() {
   URL.revokeObjectURL(url)
 }
 
+function parseCsv(content: string): string[][] {
+  let text = content
+  if (text.charCodeAt(0) === 0xFEFF) {
+    text = text.slice(1)
+  }
+
+  const rows: string[][] = []
+  let currentRow: string[] = []
+  let field = ''
+  let inQuotes = false
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i]
+
+    if (inQuotes) {
+      if (char === '"') {
+        const next = text[i + 1]
+        if (next === '"') {
+          field += '"'
+          i++
+        }
+        else {
+          inQuotes = false
+        }
+      }
+      else {
+        field += char
+      }
+    }
+    else {
+      if (char === '"') {
+        inQuotes = true
+      }
+      else if (char === ',') {
+        currentRow.push(field)
+        field = ''
+      }
+      else if (char === '\r' || char === '\n') {
+        // 处理 CRLF 或单独的 CR/LF
+        if (char === '\r' && text[i + 1] === '\n') {
+          i++
+        }
+        currentRow.push(field)
+        field = ''
+        if (currentRow.length > 1 || (currentRow.length === 1 && currentRow[0].trim() !== '')) {
+          rows.push(currentRow)
+        }
+        currentRow = []
+      }
+      else {
+        field += char
+      }
+    }
+  }
+
+  if (field.length > 0 || currentRow.length > 0) {
+    currentRow.push(field)
+    rows.push(currentRow)
+  }
+
+  return rows
+}
+
+async function importVocabularyFromCsvFile(file: File) {
+  const text = await file.text()
+  const rows = parseCsv(text)
+  if (!rows.length) {
+    window.alert('CSV 内容为空')
+    return
+  }
+
+  const header = rows[0].map(col => col.trim().toLowerCase())
+  const wordIndex = header.indexOf('word')
+  const contextIndex = header.indexOf('context')
+  const explanationIndex = header.indexOf('aiexplanation')
+
+  if (wordIndex === -1 || contextIndex === -1 || explanationIndex === -1) {
+    window.alert('CSV 头部格式不符合预期，必须包含列：word, context, aiexplanation')
+    return
+  }
+
+  let imported = 0
+
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i]
+    const rawWord = (row[wordIndex] || '').trim()
+    if (!rawWord) {
+      continue
+    }
+
+    const rawContext = row[contextIndex] || ''
+    const rawExplanation = row[explanationIndex] || ''
+
+    const context = rawContext.replace(/<\/?b>/gi, '')
+    const aiExplanation = rawExplanation.replace(/<br\s*\/?>(?=\s*\n?)/gi, '\n')
+
+    try {
+      const added = await addVocabularyItem({
+        word: rawWord,
+        context,
+        aiExplanation,
+        // 重新导入的生词没有明确来源书籍，用 0 作为占位
+        bookId: 0,
+      })
+      if (added)
+        imported++
+    }
+    catch (error) {
+      console.warn('[Vocabulary][Import] Failed to import row', { index: i, error })
+    }
+  }
+
+  await loadVocabularyOverview()
+
+  window.alert(`导入完成，共导入 ${imported} 条生词。`)
+}
+
+function onVocabularyImportClick() {
+  const el = vocabularyImportInputRef.value
+  if (!el)
+    return
+  el.value = ''
+  el.click()
+}
+
+function onVocabularyImportChange(event: Event) {
+  const target = event.target as HTMLInputElement | null
+  const file = target?.files?.[0]
+  if (!file)
+    return
+
+  void importVocabularyFromCsvFile(file)
+}
+
 function toggleLocale() {
 	const next = locale.value === 'en' ? 'zh' : 'en'
 	locale.value = next
@@ -154,11 +290,25 @@ onMounted(() => {
       </p>
       <button
         type="button"
-        class="bookshelf-anki-export-button"
+        class="bookshelf-anki-export-button bookshelf-anki-export-button--export"
         @click="exportVocabularyToAnki"
       >
-        导出生词到 Anki (JSON)
+        导出生词 CSV
       </button>
+      <button
+        type="button"
+        class="bookshelf-anki-export-button bookshelf-anki-export-button--import"
+        @click="onVocabularyImportClick"
+      >
+        导入生词 CSV
+      </button>
+      <input
+        ref="vocabularyImportInputRef"
+        type="file"
+        hidden
+        accept=".csv,text/csv"
+        @change="onVocabularyImportChange"
+      >
       <p class="bookshelf-vocabulary-words">
         {{ vocabularyWords.join(' · ') }}
       </p>
@@ -343,12 +493,25 @@ onMounted(() => {
 .bookshelf-anki-export-button {
   margin-top: 4px;
   margin-bottom: 4px;
+  margin-right: 8px;
   padding: 4px 8px;
   font-size: 12px;
   border-radius: 4px;
   cursor: pointer;
   border: 1px solid #d1d5db;
   background-color: #eef2ff;
+}
+
+.bookshelf-anki-export-button--export {
+  background-color: #eef2ff;
+  border-color: #c7d2fe;
+  color: #1e40af;
+}
+
+.bookshelf-anki-export-button--import {
+  background-color: #ecfdf3;
+  border-color: #bbf7d0;
+  color: #166534;
 }
 
 .bookshelf-vocabulary-summary {

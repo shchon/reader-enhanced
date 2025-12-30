@@ -15,10 +15,20 @@ function createId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
 }
 
-export async function addVocabularyItem(input: AddVocabularyInput): Promise<void> {
+export async function addVocabularyItem(input: AddVocabularyInput): Promise<boolean> {
   const word = input.word.trim()
   if (!word) {
-    return
+    return false
+  }
+
+  // 去重：同一本书中，完全相同的 word + context 视为同一条生词记录
+  const existing = await db.vocabulary
+    .where('word').equals(word)
+    .and(item => item.context === input.context && item.bookId === input.bookId)
+    .first()
+
+  if (existing) {
+    return false
   }
 
   const now = Date.now()
@@ -31,6 +41,8 @@ export async function addVocabularyItem(input: AddVocabularyInput): Promise<void
     bookId: input.bookId,
     createdAt: now,
   })
+
+  return true
 }
 
 export async function getVocabularyByBookId(bookId: number): Promise<VocabularyItem[]> {
