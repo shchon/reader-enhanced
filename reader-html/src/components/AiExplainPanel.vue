@@ -32,10 +32,25 @@ const displayError = computed(() => {
 const positionClass = computed(() => {
   return props.position === 'top' ? 'ai-panel-root-top' : 'ai-panel-root-bottom'
 })
+
+function handleRootClick() {
+  if (typeof window === 'undefined')
+    return
+
+  // 仅在移动端（小屏）启用“点击面板关闭”交互，避免影响桌面端使用
+  if (window.innerWidth <= 768) {
+    emit('close')
+  }
+}
 </script>
 
 <template>
-  <div v-if="visible" class="ai-panel-root" :class="positionClass">
+  <div
+    v-if="visible"
+    class="ai-panel-root"
+    :class="positionClass"
+    @click="handleRootClick"
+  >
     <div class="ai-panel">
       <header class="ai-panel-header">
         <div class="ai-panel-title">
