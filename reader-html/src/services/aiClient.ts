@@ -1,4 +1,4 @@
-import { getAiBaseUrl, getAiEnTranslatePrompt, getAiModel, getAiPromptMode, getAiZhExplainPrompt, getApiKey } from './apiKeyStorage'
+import { getAiBaseUrl, getAiEnTranslatePrompt, getAiModel, getAiPrepositionPrompt, getAiPromptMode, getAiZhExplainPrompt, getApiKey } from './apiKeyStorage'
 
 export interface ExplainSelectionRequest {
   text: string
@@ -14,6 +14,14 @@ export interface StreamHandlers {
 function buildUserPrompt(text: string, context: string): string {
   const mode = getAiPromptMode()
   const template = mode === 'en' ? getAiEnTranslatePrompt() : getAiZhExplainPrompt()
+
+  return template
+    .replace(/\{word\}/g, text)
+    .replace(/\{context\}/g, context)
+}
+
+function buildPrepositionPrompt(text: string, context: string): string {
+  const template = getAiPrepositionPrompt()
 
   return template
     .replace(/\{word\}/g, text)
@@ -46,6 +54,111 @@ export async function streamExplainSelection(
       {
         role: 'user',
         content: buildUserPrompt(payload.text, payload.context),
+      },
+    ],
+  }
+
+  let response: Response
+  try {
+    response = await fetch(baseUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(body),
+      signal,
+    })
+  }
+  catch (error: any) {
+    if (error?.name === 'AbortError') {
+      return
+    }
+    handlers.onError(error instanceof Error ? error : new Error(String(error)))
+    return
+  }
+
+  if (!response.ok || !response.body) {
+    const message = `AI request failed with status ${response.status}`
+    handlers.onError(new Error(message))
+    return
+  }
+
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder('utf-8')
+  let buffer = ''
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) {
+        break
+      }
+
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() ?? ''
+
+      for (const raw of lines) {
+        const line = raw.trim()
+        if (!line || !line.startsWith('data:')) {
+          continue
+        }
+
+        const data = line.slice('data:'.length).trim()
+        if (!data || data === '[DONE]') {
+          continue
+        }
+
+        try {
+          const json = JSON.parse(data)
+          const delta = json.choices?.[0]?.delta?.content
+          if (typeof delta === 'string' && delta.length > 0) {
+            handlers.onToken(delta)
+          }
+        }
+        catch {
+          // 忽略单个 chunk 的解析错误，继续消费后续流
+        }
+      }
+    }
+
+    handlers.onDone()
+  }
+  catch (error: any) {
+    if (error?.name === 'AbortError') {
+      return
+    }
+    handlers.onError(error instanceof Error ? error : new Error(String(error)))
+  }
+}
+
+export async function streamExplainPreposition(
+  payload: ExplainSelectionRequest,
+  handlers: StreamHandlers,
+  signal?: AbortSignal,
+): Promise<void> {
+  const apiKey = getApiKey()
+  if (!apiKey) {
+    handlers.onError(new Error('MISSING_API_KEY'))
+    return
+  }
+
+  const baseUrl = getAiBaseUrl()
+  const model = getAiModel()
+
+  const body = {
+    model,
+    stream: true,
+    messages: [
+      {
+        role: 'system',
+        content:
+          'You are an AI assistant helping users read English books and learn vocabulary. Answer in Chinese and explain the target word in clear, concise language.',
+      },
+      {
+        role: 'user',
+        content: buildPrepositionPrompt(payload.text, payload.context),
       },
     ],
   }

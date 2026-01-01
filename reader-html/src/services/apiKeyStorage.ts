@@ -4,6 +4,7 @@ export const AI_MODEL_STORAGE_KEY = 'lingoReader.aiModel'
 export const AI_PROMPT_GENERAL_STORAGE_KEY = 'lingoReader.aiPromptGeneral'
 export const AI_PROMPT_EN_TRANSLATE_STORAGE_KEY = 'lingoReader.aiPromptEnTranslate'
 export const AI_PROMPT_ZH_EXPLAIN_STORAGE_KEY = 'lingoReader.aiPromptZhExplain'
+export const AI_PROMPT_PREPOSITION_STORAGE_KEY = 'lingoReader.aiPromptPreposition'
 export const AI_PROMPT_MODE_STORAGE_KEY = 'lingoReader.aiPromptMode'
 
 const DEFAULT_AI_BASE_URL = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions'
@@ -37,6 +38,27 @@ const DEFAULT_EN_TRANSLATE_PROMPT = `你是一名专业的英语词汇与语境�
 固定搭配：
 例句：`
 
+const DEFAULT_PREPOSITION_PROMPT = `# Role: 英语语法与语义专家
+
+# Task:
+请帮我分析句子中指定介词的用法，并提供可替换的介词或介词短语。
+
+# Input:
+- **句子 {context}
+- **目标介词 {word}
+
+# Analysis Requirements:
+1. **原句分析**: 解释该介词在原句中的具体含义、语法功能以及它所传达的语气。
+2. **完美替换 (Direct Replacements)**: 列出意思几乎完全相同、可以直接替换的介词或短语（如有）。
+3. **近义替换 (Nuanced Alternatives)**: 列出意思相近但会有细微差别的替换项。请详细说明：
+   - **含义变化**: 意思发生了什么改变？
+   - **语体变化**: 变得更正式 (Formal) 还是更口语 (Casual)？
+   - **侧重点**: 强调了什么不同的方面？
+4. **不可替换的情况**: 如果有常见的错误替换（False Friends），请指出来并解释为什么不能用。
+
+# Output Format:
+请使用清晰的列表或表格形式展示分析结果。`
+
 export function getDefaultAiBaseUrl(): string {
   return DEFAULT_AI_BASE_URL
 }
@@ -51,6 +73,10 @@ export function getDefaultEnTranslatePrompt(): string {
 
 export function getDefaultZhExplainPrompt(): string {
   return DEFAULT_ZH_EXPLAIN_PROMPT
+}
+
+export function getDefaultPrepositionPrompt(): string {
+  return DEFAULT_PREPOSITION_PROMPT
 }
 
 function getStorage(): Storage | null {
@@ -179,6 +205,19 @@ export function setAiZhExplainPrompt(prompt: string): void {
   }
 
   setString(AI_PROMPT_ZH_EXPLAIN_STORAGE_KEY, prompt)
+}
+
+export function getAiPrepositionPrompt(): string {
+  return getString(AI_PROMPT_PREPOSITION_STORAGE_KEY) || DEFAULT_PREPOSITION_PROMPT
+}
+
+export function setAiPrepositionPrompt(prompt: string): void {
+  if (!prompt) {
+    setString(AI_PROMPT_PREPOSITION_STORAGE_KEY, DEFAULT_PREPOSITION_PROMPT)
+    return
+  }
+
+  setString(AI_PROMPT_PREPOSITION_STORAGE_KEY, prompt)
 }
 
 export type AiPromptMode = 'en' | 'zh'

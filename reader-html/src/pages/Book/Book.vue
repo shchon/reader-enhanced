@@ -54,6 +54,7 @@ const {
   output: aiOutput,
   currentWord: aiCurrentWord,
   explainSelection,
+  explainPrepositionSelection,
   closePanel: closeAiPanel,
 } = useAiExplainSelection()
 
@@ -77,6 +78,26 @@ function handleExplainSelection() {
   }
 
   void explainSelection({ text, context })
+}
+
+function handlePrepositionSelection() {
+  const text = selectionText.value
+  const context = selectionContext.value
+  console.info('[AI][Menu][Preposition]', {
+    text,
+    context,
+  })
+
+  const viewportHeight = window.innerHeight || 0
+  const y = selectionMenuY.value
+  if (viewportHeight && y > viewportHeight / 2) {
+    aiPanelPosition.value = 'top'
+  }
+  else {
+    aiPanelPosition.value = 'bottom'
+  }
+
+  void explainPrepositionSelection({ text, context })
 }
 
 async function handleAddVocabulary() {
@@ -284,6 +305,7 @@ function tocItemClick(item: FlatedTocItem) {
     :y="selectionMenuY"
     :text="selectionText"
     @explain="handleExplainSelection"
+    @preposition="handlePrepositionSelection"
     @read-aloud="handleReadAloudSelection"
     @add-vocabulary="handleAddVocabulary"
     @close="handleCloseSelectionMenu"

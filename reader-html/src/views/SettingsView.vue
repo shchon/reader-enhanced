@@ -7,11 +7,13 @@ import {
   getAiEnTranslatePrompt,
   getAiModel,
   getAiZhExplainPrompt,
+  getAiPrepositionPrompt,
   getApiKey,
   setAiBaseUrl,
   setAiEnTranslatePrompt,
   setAiModel,
   setAiZhExplainPrompt,
+  setAiPrepositionPrompt,
   getAiPromptMode,
   setAiPromptMode,
   setApiKey,
@@ -19,6 +21,7 @@ import {
   getDefaultAiModel,
   getDefaultEnTranslatePrompt,
   getDefaultZhExplainPrompt,
+  getDefaultPrepositionPrompt,
 } from '../services/apiKeyStorage'
 import { testAiConnection } from '../services/aiClient'
 
@@ -32,6 +35,7 @@ const model = ref('')
 const activePromptTab = ref<'enTranslate' | 'zhExplain'>('zhExplain')
 const promptEnTranslate = ref('')
 const promptZhExplain = ref('')
+const promptPreposition = ref('')
 
 const statusMessage = ref('')
 const statusType = ref<'info' | 'success' | 'error'>('info')
@@ -49,6 +53,7 @@ onMounted(() => {
 
   promptEnTranslate.value = getAiEnTranslatePrompt()
   promptZhExplain.value = getAiZhExplainPrompt()
+  promptPreposition.value = getAiPrepositionPrompt()
 
   activePromptTab.value = getAiPromptMode() === 'en' ? 'enTranslate' : 'zhExplain'
 })
@@ -69,6 +74,7 @@ async function handleSave() {
 
     setAiEnTranslatePrompt(promptEnTranslate.value)
     setAiZhExplainPrompt(promptZhExplain.value)
+    setAiPrepositionPrompt(promptPreposition.value)
 
     setStatus(t('settingsSaved'), 'success')
   }
@@ -83,6 +89,7 @@ function handleResetToDefaults() {
   model.value = getDefaultAiModel()
   promptEnTranslate.value = getDefaultEnTranslatePrompt()
   promptZhExplain.value = getDefaultZhExplainPrompt()
+  promptPreposition.value = getDefaultPrepositionPrompt()
 }
 
 function handleClickEnPromptTab() {
@@ -208,6 +215,18 @@ function handleBackToHome() {
           v-model="promptZhExplain"
           class="settings-textarea"
           rows="8"
+        />
+      </div>
+
+      <div class="settings-field-group">
+        <label class="settings-label" for="settings-preposition-prompt">
+          {{ t('settingsPrepositionPromptLabel') }}
+        </label>
+        <textarea
+          id="settings-preposition-prompt"
+          v-model="promptPreposition"
+          class="settings-textarea"
+          rows="6"
         />
       </div>
 

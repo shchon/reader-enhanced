@@ -11,6 +11,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'explain'): void
+  (e: 'preposition'): void
   (e: 'read-aloud'): void
   (e: 'add-vocabulary'): void
   (e: 'close'): void
@@ -38,21 +39,28 @@ const style = computed(() => ({
         <div class="selection-menu-actions-main">
           <button
             type="button"
-            class="selection-menu-button primary"
+            class="selection-menu-button primary selection-menu-button--explain"
             @click="emit('explain')"
           >
             {{ t('selectionMenuExplain') }}
           </button>
           <button
             type="button"
-            class="selection-menu-button secondary"
+            class="selection-menu-button secondary selection-menu-button--preposition"
+            @click="emit('preposition')"
+          >
+            {{ t('selectionMenuPreposition') }}
+          </button>
+          <button
+            type="button"
+            class="selection-menu-button secondary selection-menu-button--read"
             @click="emit('read-aloud')"
           >
             {{ t('selectionMenuReadAloud') }}
           </button>
           <button
             type="button"
-            class="selection-menu-button secondary"
+            class="selection-menu-button secondary selection-menu-button--add"
             @click="emit('add-vocabulary')"
           >
             {{ t('selectionMenuAddVocabulary') }}
@@ -132,14 +140,14 @@ const style = computed(() => ({
   background-color: #1d4ed8;
 }
 
-.selection-menu-button.secondary {
+ .selection-menu-button.secondary {
   background-color: #059669;
   color: #ffffff;
-}
+ }
 
-.selection-menu-button.secondary:hover {
-  background-color: #047857;
-}
+ .selection-menu-button.secondary:hover {
+  filter: brightness(0.9);
+ }
 
 .selection-menu-button.ghost {
   background-color: transparent;
@@ -149,5 +157,26 @@ const style = computed(() => ({
 .selection-menu-button.ghost:hover {
   background-color: #111827;
   color: #ffffff;
+}
+
+/* 独立配色，便于一眼区分不同操作 */
+.selection-menu-button.selection-menu-button--explain {
+  background-color: #2563eb;
+}
+
+.selection-menu-button.selection-menu-button--preposition {
+  background-color: #0ea5e9;
+}
+
+.selection-menu-button.selection-menu-button--read {
+  background-color: #22c55e;
+}
+
+.selection-menu-button.selection-menu-button--add {
+  background-color: #f59e0b;
+}
+
+.selection-menu-button.ghost {
+  border: 1px solid #4b5563;
 }
 </style>
