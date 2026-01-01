@@ -13,6 +13,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'close'): void
+  (e: 'add'): void
 }>()
 
 const { t } = useI18n()
@@ -56,9 +57,18 @@ function handleRootClick() {
         <div class="ai-panel-title">
           {{ t('aiPanelTitle') }}
         </div>
-        <button type="button" class="ai-panel-close" @click="emit('close')">
-          {{ t('aiPanelClose') }}
-        </button>
+        <div class="ai-panel-actions">
+          <button
+            type="button"
+            class="ai-panel-add"
+            @click.stop="emit('add')"
+          >
+            {{ t('aiPanelAdd') }}
+          </button>
+          <button type="button" class="ai-panel-close" @click.stop="emit('close')">
+            {{ t('aiPanelClose') }}
+          </button>
+        </div>
       </header>
       <main class="ai-panel-body">
         <p v-if="word" class="ai-panel-word">
@@ -120,6 +130,26 @@ body.reader-theme-dark .ai-panel {
 
 .ai-panel-title {
   font-weight: 600;
+}
+
+.ai-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ai-panel-add {
+  border: none;
+  background-color: #22c55e;
+  color: #ffffff;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.ai-panel-add:hover {
+  filter: brightness(0.95);
 }
 
 .ai-panel-close {

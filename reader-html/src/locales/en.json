@@ -61,6 +61,7 @@
   "selectionMenuClose": "Close",
   "aiPanelTitle": "AI Explain",
   "aiPanelClose": "Close",
+  "aiPanelAdd": "Add",
   "aiPanelLoading": "Analyzing...",
   "aiPanelNoApiKey": "Please set your AI API key in Settings before using this feature."
 }

@@ -61,6 +61,7 @@
   "selectionMenuClose": "关闭",
   "aiPanelTitle": "AI 解释",
   "aiPanelClose": "关闭",
+  "aiPanelAdd": "添加",
   "aiPanelLoading": "正在分析...",
   "aiPanelNoApiKey": "请先在设置页中配置 AI 接口 Key，才能使用此功能。"
 }

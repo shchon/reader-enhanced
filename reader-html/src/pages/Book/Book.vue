@@ -317,6 +317,7 @@ function tocItemClick(item: FlatedTocItem) {
     :word="aiCurrentWord"
     :content="aiOutput"
     :position="aiPanelPosition"
+    @add="handleAddVocabulary"
     @close="closeAiPanel"
   />
 </template>
