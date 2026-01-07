@@ -1,5 +1,5 @@
 import { type Ref, nextTick, onMounted, onUnmounted, watch } from 'vue'
-import { getVocabularyByBookId } from '../services/vocabularyService'
+import { getAllVocabularyItems } from '../services/vocabularyService'
 import type { VocabularyItem } from '../services/db'
 
 const VOCAB_UPDATE_EVENT = 'lingoReader:vocabularyUpdated'
@@ -82,8 +82,8 @@ function clearExistingHighlights(root: HTMLElement) {
   }
 }
 
-async function applyHighlights(root: HTMLElement, bookId: number) {
-  const items = await getVocabularyByBookId(bookId)
+async function applyHighlights(root: HTMLElement) {
+  const items = await getAllVocabularyItems()
   if (!items.length) {
     clearExistingHighlights(root)
     return
@@ -103,26 +103,19 @@ export function useVocabularyHighlight(options: {
   const { rootRef, bookId, chapterHtml } = options
 
   const schedule = async () => {
-    const id = bookId.value
-    if (!id || !rootRef.value)
+    if (!rootRef.value)
       return
     await nextTick()
     if (!rootRef.value)
       return
-    void applyHighlights(rootRef.value, id)
+    void applyHighlights(rootRef.value)
   }
 
   watch([bookId, chapterHtml], () => {
     void schedule()
   })
 
-  const handleExternalUpdate = (event: Event) => {
-    const custom = event as CustomEvent<{ bookId?: number }>
-    const updatedBookId = custom.detail?.bookId
-    if (!updatedBookId)
-      return
-    if (updatedBookId !== bookId.value)
-      return
+  const handleExternalUpdate = (_event: Event) => {
     void schedule()
   }
 
