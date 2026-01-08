@@ -12,11 +12,12 @@ const { t, locale } = useI18n()
 const { isImporting, books, handleFilesSelected, loadBooks, openBookFromId, deleteBook } = useBookshelf()
 
 const vocabularyWords = ref<string[]>([])
+const vocabularyTotalCount = ref(0)
 const isVocabularyOpen = ref(false)
 
 const vocabularyImportInputRef = ref<HTMLInputElement | null>(null)
 
-const vocabularyCount = computed(() => vocabularyWords.value.length)
+const vocabularyCount = computed(() => vocabularyTotalCount.value)
 
 function onFileChange(event: Event) {
   const target = event.target as HTMLInputElement | null
@@ -38,6 +39,8 @@ async function onDeleteBook(bookId: number, title: string) {
 
 async function loadVocabularyOverview() {
   const items = await getAllVocabularyItems()
+  vocabularyTotalCount.value = items.length
+
   const sorted = items
     .slice()
     .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))

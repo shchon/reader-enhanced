@@ -21,10 +21,10 @@ export async function addVocabularyItem(input: AddVocabularyInput): Promise<bool
     return false
   }
 
-  // 去重：同一本书中，完全相同的 word + context 视为同一条生词记录
+  // 去重：全局范围内，完全相同的 word + context 视为同一条生词记录（不再区分 bookId）
   const existing = await db.vocabulary
     .where('word').equals(word)
-    .and(item => item.context === input.context && item.bookId === input.bookId)
+    .and(item => item.context === input.context)
     .first()
 
   if (existing) {
