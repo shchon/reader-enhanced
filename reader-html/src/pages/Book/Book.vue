@@ -10,7 +10,7 @@ import { useClickOutside, withPx } from '../../utils'
 import { ReaderType, flatToc } from './Book'
 import type { FlatedTocItem } from './Book'
 import ConfigPannel from './components/ConfigPannel.vue'
-import { useSelectionDebug } from '../../composables/useSelectionDebug'
+import { extractSelectionInfo, useSelectionDebug } from '../../composables/useSelectionDebug'
 import { useSelectionMenu } from '../../composables/useSelectionMenu'
 import SelectionMenu from '../../components/SelectionMenu.vue'
 import { useAiExplainSelection } from '../../composables/useAiExplainSelection'
@@ -46,6 +46,15 @@ const {
   context: selectionContext,
   hide: hideSelectionMenu,
 } = useSelectionMenu()
+
+const topSelectionText = ref('')
+const topSelectionContext = ref('')
+
+function updateTopSelectionSnapshot() {
+  const info = extractSelectionInfo()
+  topSelectionText.value = info?.text ?? ''
+  topSelectionContext.value = info?.context ?? ''
+}
 
 // Phase 2 - Step 4: AI explain panel
 const {
@@ -137,7 +146,6 @@ async function handleAddVocabulary() {
 
   // 添加完成后关闭 AI 面板（如果有）和浮动菜单
   closeAiPanel()
-  hideSelectionMenu()
 }
 
 function handleReadAloudSelection() {
@@ -154,7 +162,8 @@ function handleReadAloudSelection() {
 }
 
 function canUseSelectionAction(): boolean {
-  return Boolean(selectionText.value && selectionText.value.trim().length)
+  updateTopSelectionSnapshot()
+  return Boolean(topSelectionText.value && topSelectionText.value.trim().length)
 }
 
 function tryRunSelectionAction(action: () => void, emptyMessage: string) {
@@ -163,6 +172,47 @@ function tryRunSelectionAction(action: () => void, emptyMessage: string) {
     return
   }
   action()
+}
+
+function runExplainFromTop() {
+  updateTopSelectionSnapshot()
+  const text = topSelectionText.value
+  const context = topSelectionContext.value
+  if (!text)
+    return
+  void explainSelection({ text, context })
+}
+
+function runPrepositionFromTop() {
+  updateTopSelectionSnapshot()
+  const text = topSelectionText.value
+  const context = topSelectionContext.value
+  if (!text)
+    return
+  void explainPrepositionSelection({ text, context })
+}
+
+function runReadAloudFromTop() {
+  updateTopSelectionSnapshot()
+  const sentence = topSelectionContext.value || topSelectionText.value
+  if (!sentence)
+    return
+  if (typeof window === 'undefined' || !('speechSynthesis' in window))
+    return
+  const utterance = new SpeechSynthesisUtterance(sentence)
+  window.speechSynthesis.cancel()
+  window.speechSynthesis.speak(utterance)
+}
+
+function runAddVocabularyFromTop() {
+  updateTopSelectionSnapshot()
+  const text = topSelectionText.value.trim()
+  if (!text)
+    return
+  // reuse existing add logic by syncing menu refs temporarily
+  selectionText.value = topSelectionText.value
+  selectionContext.value = topSelectionContext.value
+  void handleAddVocabulary()
 }
 
 function handleCloseSelectionMenu() {
@@ -263,28 +313,28 @@ function tocItemClick(item: FlatedTocItem) {
         <button
           class="top-action-btn"
           title="Explain"
-          @click.stop="tryRunSelectionAction(handleExplainSelection, '请先选中要解释的文本')"
+          @click.stop="tryRunSelectionAction(runExplainFromTop, '请先选中要解释的文本')"
         >
           解
         </button>
         <button
           class="top-action-btn"
           title="Preposition"
-          @click.stop="tryRunSelectionAction(handlePrepositionSelection, '请先选中要分析的文本')"
+          @click.stop="tryRunSelectionAction(runPrepositionFromTop, '请先选中要分析的文本')"
         >
           介
         </button>
         <button
           class="top-action-btn"
           title="Read Aloud"
-          @click.stop="tryRunSelectionAction(handleReadAloudSelection, '请先选中要朗读的文本')"
+          @click.stop="tryRunSelectionAction(runReadAloudFromTop, '请先选中要朗读的文本')"
         >
           读
         </button>
         <button
           class="top-action-btn"
           title="Add Vocabulary"
-          @click.stop="tryRunSelectionAction(() => { void handleAddVocabulary() }, '请先选中要添加的单词或短语')"
+          @click.stop="tryRunSelectionAction(runAddVocabularyFromTop, '请先选中要添加的单词或短语')"
         >
           添
         </button>
@@ -337,17 +387,7 @@ function tocItemClick(item: FlatedTocItem) {
       @receive-config="receiveConfig" @info-down="infoBarDown"
     />
   </div>
-  <SelectionMenu
-    :visible="isSelectionMenuVisible"
-    :x="selectionMenuX"
-    :y="selectionMenuY"
-    :text="selectionText"
-    @explain="handleExplainSelection"
-    @preposition="handlePrepositionSelection"
-    @read-aloud="handleReadAloudSelection"
-    @add-vocabulary="handleAddVocabulary"
-    @close="handleCloseSelectionMenu"
-  />
+  <!-- SelectionMenu disabled: keep selection-based actions via top toolbar -->
   <AiExplainPanel
     :visible="isAiPanelVisible"
     :loading="isAiLoading"

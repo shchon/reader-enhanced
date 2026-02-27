@@ -40,7 +40,7 @@ function getSentenceAroundSelection(fullText: string, selectedText: string): str
   return sentence || text
 }
 
-function extractSelection(): SelectionInfo | null {
+export function extractSelectionInfo(): SelectionInfo | null {
   const selection = window.getSelection()
   if (!selection || selection.isCollapsed) {
     return null
@@ -80,7 +80,7 @@ export function useSelectionDebug() {
       return
     }
 
-    const info = extractSelection()
+    const info = extractSelectionInfo()
     if (info) {
       // selection debug output was only for development; intentionally left unused
     }
