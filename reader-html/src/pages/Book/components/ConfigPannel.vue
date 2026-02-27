@@ -35,6 +35,27 @@ function toggleTheme(item: Config) {
   // @ts-expect-error runtime unwrapping makes this safe
   item.value = item.value === 'light' ? 'dark' : 'light'
 }
+
+function isReaderModeItem(item: Config): boolean {
+  return item.type === 'selection' && item.name === 'readerMode'
+}
+
+function cycleReaderMode(item: Config, direction: -1 | 1) {
+  if (!isReaderModeItem(item))
+    return
+
+  const options = item.selectOptions || []
+  if (!options.length)
+    return
+
+  const current = String(item.value)
+  const idx = options.findIndex(opt => opt.name === current)
+  const currentIndex = idx >= 0 ? idx : 0
+  const nextIndex = (currentIndex + direction + options.length) % options.length
+
+  // @ts-expect-error runtime unwrapping makes this safe
+  item.value = options[nextIndex].name
+}
 </script>
 
 <template>
@@ -54,6 +75,16 @@ function toggleTheme(item: Config) {
             @click.stop="toggleTheme(item)"
           >
             <span class="theme-switch-handle" />
+          </button>
+        </div>
+        <div v-else-if="isReaderModeItem(item)" class="mode-stepper-row" @click.stop>
+          <span class="label">{{ t(item.name) }}</span>
+          <button class="mode-stepper-btn" @click.stop="cycleReaderMode(item, -1)">
+            -
+          </button>
+          <span class="mode-stepper-value">{{ item.value }}</span>
+          <button class="mode-stepper-btn" @click.stop="cycleReaderMode(item, 1)">
+            +
           </button>
         </div>
         <!-- @vue-expect-error item.value is a ref, it can be handled by vue -->
@@ -149,6 +180,46 @@ function toggleTheme(item: Config) {
 
 .theme-switch-on .theme-switch-handle {
   transform: translateX(20px);
+}
+
+.mode-stepper-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mode-stepper-row .label {
+  flex-shrink: 0;
+  width: 150px;
+  font-size: 14px;
+  color: #333;
+}
+
+.mode-stepper-btn {
+  width: 40px;
+  height: 37px;
+  background-color: #fefefe;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.mode-stepper-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.mode-stepper-value {
+  flex: 1;
+  width: 0;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-family: sans-serif;
+  user-select: none;
 }
 
 @media (max-width: 768px) {

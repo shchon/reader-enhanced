@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { defineAsyncComponent, ref, useTemplateRef } from 'vue'
+import { computed, defineAsyncComponent, ref, useTemplateRef } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useBookStore } from '../../store'
-import DropDown from '../../components/DropDown'
+import type { Mode } from '../../components/DropDown/DropDown.vue'
 import type { Config } from '../../components/Readers/sharedLogic'
+import { generateSelectionConfig } from '../../components/Readers/sharedLogic'
 import { useClickOutside, withPx } from '../../utils'
 import { ReaderType, flatToc } from './Book'
 import type { FlatedTocItem } from './Book'
@@ -63,6 +64,9 @@ const aiPanelPosition = ref<'top' | 'bottom'>('bottom')
 function handleExplainSelection() {
   const text = selectionText.value
   const context = selectionContext.value
+  if (!text) {
+    return
+  }
   console.info('[AI][Menu][Explain]', {
     text,
     context,
@@ -83,6 +87,9 @@ function handleExplainSelection() {
 function handlePrepositionSelection() {
   const text = selectionText.value
   const context = selectionContext.value
+  if (!text) {
+    return
+  }
   console.info('[AI][Menu][Preposition]', {
     text,
     context,
@@ -146,6 +153,18 @@ function handleReadAloudSelection() {
   window.speechSynthesis.speak(utterance)
 }
 
+function canUseSelectionAction(): boolean {
+  return Boolean(selectionText.value && selectionText.value.trim().length)
+}
+
+function tryRunSelectionAction(action: () => void, emptyMessage: string) {
+  if (!canUseSelectionAction()) {
+    window.alert(emptyMessage)
+    return
+  }
+  action()
+}
+
 function handleCloseSelectionMenu() {
   // 关闭 AI 解释面板（如果当前是打开的）
   closeAiPanel()
@@ -156,7 +175,7 @@ function handleCloseSelectionMenu() {
 /**
  * info bar show or hide
  */
-const isInfoDown = ref<boolean>(false)
+const isInfoDown = ref<boolean>(true)
 function back() {
   bookStore.reset()
   router.push('/')
@@ -164,29 +183,8 @@ function back() {
 // when mouse click outside the selection, the infor bar will be clicked.
 //  but we don't want it to be clicked, so we need to prevent it when cancel
 //  the selection.
-let shouldTriggerClick = true
-function infoBarToggle(e: Event) {
-  if (!shouldTriggerClick) {
-    shouldTriggerClick = true
-    return
-  }
-  const selection = window.getSelection()!.toString()
-  if (selection.length > 0) {
-    e.preventDefault()
-    e.stopImmediatePropagation()
-  }
-  else {
-    isInfoDown.value = !isInfoDown.value
-  }
-}
-function handleMouseDown() {
-  const selection = window.getSelection()!
-  if (selection.toString().length > 0) {
-    shouldTriggerClick = false
-  }
-}
 function infoBarDown() {
-  isInfoDown.value = false
+  isInfoDown.value = true
 }
 
 /**
@@ -199,6 +197,10 @@ const readerModes = [
 ]
 const modeName = ref<string>(ReaderType.SCROLL)
 
+const modeOptions = readerModes.map((mode): Mode => ({
+  name: mode.name,
+}))
+
 /**
  * receive config
  */
@@ -206,6 +208,11 @@ const currentConfig = ref<Config[]>([])
 function receiveConfig(configs: Config[]): void {
   currentConfig.value = configs
 }
+
+const displayBookTitle = computed(() => {
+  const title = bookStore.getFileName()
+  return title.length > 10 ? `${title.slice(0, 10)}...` : title
+})
 
 /**
  * book toc
@@ -245,15 +252,43 @@ function tocItemClick(item: FlatedTocItem) {
         <img src="/leftArrow.svg" alt="leftArrow">
         <span>{{ t('back') }}</span>
       </div>
-      <DropDown v-model:current-mode-name="modeName" class="bar-left-dropdown" :modes="readerModes" />
       <!-- configPanel -->
-      <ConfigPannel :config="currentConfig" />
+      <ConfigPannel :config="[generateSelectionConfig('readerMode', modeOptions, modeName), ...currentConfig]" />
     </div>
     <!--
       info bar middle
      -->
-    <div :title="bookStore.getFileName()" class="top-info-bar-middle text-ellipses">
-      {{ bookStore.getFileName() }}
+    <div class="top-info-bar-middle">
+      <div class="top-action-buttons" @click.stop>
+        <button
+          class="top-action-btn"
+          title="Explain"
+          @click.stop="tryRunSelectionAction(handleExplainSelection, '请先选中要解释的文本')"
+        >
+          解
+        </button>
+        <button
+          class="top-action-btn"
+          title="Preposition"
+          @click.stop="tryRunSelectionAction(handlePrepositionSelection, '请先选中要分析的文本')"
+        >
+          介
+        </button>
+        <button
+          class="top-action-btn"
+          title="Read Aloud"
+          @click.stop="tryRunSelectionAction(handleReadAloudSelection, '请先选中要朗读的文本')"
+        >
+          读
+        </button>
+        <button
+          class="top-action-btn"
+          title="Add Vocabulary"
+          @click.stop="tryRunSelectionAction(() => { void handleAddVocabulary() }, '请先选中要添加的单词或短语')"
+        >
+          添
+        </button>
+      </div>
     </div>
     <!--
       info bar right
@@ -265,6 +300,9 @@ function tocItemClick(item: FlatedTocItem) {
         <span>{{ t('tableOfContent') }}</span>
       </div>
       <div :class="{ 'hide-toc': !showToc }" class="toc" @wheel.stop.passive>
+        <div class="toc-header" :title="bookStore.getFileName()">
+          {{ displayBookTitle }}
+        </div>
         <ul>
           <li
             v-for="item in toc" :key="item.href" :style="{ paddingLeft: withPx(20 + item.level * 20) }"
@@ -279,7 +317,7 @@ function tocItemClick(item: FlatedTocItem) {
   <!--
     Reader show
    -->
-  <div @mousedown="handleMouseDown" @click="infoBarToggle">
+  <div>
     <ColumnReader
       v-if="modeName === ReaderType.COLUMN"
       :selected-toc-item="selectedTocItem"
@@ -375,9 +413,35 @@ function tocItemClick(item: FlatedTocItem) {
 
 .top-info-bar-middle {
   flex: 1;
-  text-align: center;
-  padding: 30px;
-  font-weight: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+}
+
+.top-action-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+
+.top-action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: #fefefe;
+  color: #333;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: sans-serif;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.top-action-btn:hover {
+  background-color: #e5e5e5;
 }
 
 /*
@@ -419,6 +483,21 @@ function tocItemClick(item: FlatedTocItem) {
   transition: right 0.1s;
 }
 
+.toc-header {
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #e5e5e5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .hide-toc {
   right: -400px;
 }
@@ -457,11 +536,18 @@ function tocItemClick(item: FlatedTocItem) {
   }
 
   .top-info-bar-middle {
-    padding: 0 8px;
-    font-size: 14px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    padding: 0 4px;
+  }
+
+  .top-action-buttons {
+    gap: 6px;
+  }
+
+  .top-action-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    font-size: 12px;
   }
 
   .top-info-bar-right {

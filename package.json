@@ -44,6 +44,6 @@
     "pre-commit": "pnpm lint-staged"
   },
   "lint-staged": {
-    "*": "eslint . --fix --cache"
+    "**/*.{js,mjs,cjs,ts,tsx,vue}": "eslint --fix --cache"
   }
 }
